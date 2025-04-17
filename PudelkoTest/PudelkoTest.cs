@@ -20,7 +20,6 @@ namespace PudelkoUnitTests
     }
 
     // ========================================
-
     [TestClass]
     public class UnitTestsPudelkoConstructors
     {
@@ -447,7 +446,6 @@ namespace PudelkoUnitTests
 
 
         #region Pole, Objętość ===================================
-        // ToDo
 
         #endregion
 
@@ -511,6 +509,6 @@ namespace PudelkoUnitTests
         #region Parsing =========================================
 
         #endregion
-
     }
 }
+
