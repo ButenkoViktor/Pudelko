@@ -3,7 +3,10 @@ using PudelkoLibrary;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace PudelkoUnitTests
 {
@@ -447,14 +450,186 @@ namespace PudelkoUnitTests
 
         #region Pole, Objętość ===================================
 
+        // Test sprawdza, czy właściwość Objetosc poprawnie oblicza objętość pudełka.
+        [TestMethod, TestCategory("Pole, Objętość")]
+        public void Objetosc_PoprawneObliczenie()
+        {
+            // AAA
+
+            // Arrange
+            var pudelko = new Pudelko(2.5, 3.1, 4.2);
+            double oczekiwanaObjetosc = Math.Round(2.5 * 3.1 * 4.2, 9);
+            // Act
+            double rzeczywistaObjetosc = pudelko.Objetosc;
+            // Assert
+            Assert.AreEqual(oczekiwanaObjetosc, rzeczywistaObjetosc, 1e-9);
+        }
+
+        // Test sprawdza, czy właściwość Pole poprawnie oblicza pole powierzchni pudełka.
+        [TestMethod, TestCategory("Pole, Objętość")]
+        public void Pole_PoprawneObliczenie()
+        {
+            // AAA
+
+            // Arrange
+            var pudelko = new Pudelko(2.5, 3.1, 4.2);
+            double oczekiwanePole = Math.Round(2 * (2.5 * 3.1 + 3.1 * 4.2 + 2.5 * 4.2), 6);
+            // Act
+            double rzeczywistePole = pudelko.Pole;
+            // Assert
+            Assert.AreEqual(oczekiwanePole, rzeczywistePole, 1e-6);
+        }
+
+        // Test sprawdza właściwości Objetosc i Pole dla różnych wymiarów pudełka.
+        [DataTestMethod, TestCategory("Pole, Objętość")]
+        [DataRow(1.0, 1.0, 1.0, 1.0, 6.0)]
+        [DataRow(2.0, 3.0, 4.0, 24.0, 52.0)]
+        [DataRow(0.1, 0.2, 0.3, 0.006, 0.22)]
+        public void ObjetoscIPole_TestParametryzowany(double a, double b, double c, double oczekiwanaObjetosc, double oczekiwanePole)
+        {
+            // AAA
+
+            // Arrange
+            var pudelko = new Pudelko(a, b, c);
+            // Act
+            double rzeczywistaObjetosc = pudelko.Objetosc;
+            double rzeczywistePole = pudelko.Pole;
+            // Assert
+            Assert.AreEqual(oczekiwanaObjetosc, rzeczywistaObjetosc, 1e-9);
+            Assert.AreEqual(oczekiwanePole, rzeczywistePole, 1e-6);
+        }
+
+
         #endregion
 
         #region Equals ===========================================
-        // ToDo
+        [TestMethod, TestCategory("Equals")]
+        // Test sprawdza, czy metoda Equals poprawnie identyfikuje dwa pudełka o tych samych wymiarach jako równe.
+        public void Equals_PudelkaRowne()
+        {
+            // AAA 
+
+            // Arrange
+            var p1 = new Pudelko(2.5, 3.1, 4.2);
+            var p2 = new Pudelko(2.5, 3.1, 4.2);
+
+            // Act
+            bool wynik = p1.Equals(p2);
+
+            // Assert
+            Assert.IsTrue(wynik);
+        }
+
+        // Test sprawdza, czy metoda Equals poprawnie identyfikuje dwa pudełka o różnych wymiarach jako różne.
+        [TestMethod, TestCategory("Equals")]
+        public void Equals_PudelkaRozne()
+        {
+            // AAA
+
+            // Arrange
+            var p1 = new Pudelko(2.5, 3.1, 4.2);
+            var p2 = new Pudelko(3.0, 2.0, 5.0);
+
+            // Act
+            bool wynik = p1.Equals(p2);
+
+            // Assert
+            Assert.IsFalse(wynik);
+        }
+
+        // Test sprawdza, czy metoda Equals poprawnie identyfikuje pudełko jako różne od null.
+        [TestMethod, TestCategory("Equals")]
+        public void Equals_PudelkoZNull()
+        {
+            // AAA
+
+            // Arrange
+            var p1 = new Pudelko(2.5, 3.1, 4.2);
+            Pudelko? p2 = null;
+
+            // Act
+            bool wynik = p1.Equals(p2);
+
+            // Assert
+            Assert.IsFalse(wynik);
+        }
+
+        // Test sprawdza, czy metoda Equals poprawnie identyfikuje dwa pudełka o tych samych wymiarach w innej kolejności jako równe.
+        [TestMethod, TestCategory("Equals")]
+        public void Equals_RozneKolejnosciWymiarow()
+        {
+            // AAA
+
+            // Arrange
+            var p1 = new Pudelko(2.5, 3.1, 4.2);
+            var p2 = new Pudelko(4.2, 2.5, 3.1);
+
+            // Act
+            bool wynik = p1.Equals(p2);
+
+            // Assert
+            Assert.IsTrue(wynik);
+        }
+
+        // Test sprawdza, czy metoda Equals poprawnie identyfikuje obiekt innego typu jako różny.
+        [TestMethod, TestCategory("Equals")]
+        public void Equals_PudelkoZInnymTypem()
+        {
+            // AAA
+
+            // Arrange
+            var p1 = new Pudelko(2.5, 3.1, 4.2);
+            var innyObiekt = "Nie Pudelko";
+
+            // Act
+            bool wynik = p1.Equals(innyObiekt);
+
+            // Assert
+            Assert.IsFalse(wynik);
+        }
+
+
         #endregion
 
         #region Operators overloading ===========================
-        // ToDo
+        [TestMethod, TestCategory("Operators overloading")]
+        // Test sprawdza, czy operator "+" poprawnie łączy pudełko z domyślnym pudełkiem
+        public void Operator_Plus_LaczeniePudelek()
+        {
+            // AAA
+
+            // Arrange
+            var p1 = new Pudelko(2.5, 3.1, 4.2);
+            var p2 = new Pudelko(3.0, 2.0, 5.0);
+
+            // Act
+            var result = p1 + p2;
+
+            // Assert
+            Assert.AreEqual(3.0, result.A, 1e-3);
+            Assert.AreEqual(3.1, result.B, 1e-3);
+            Assert.AreEqual(5.0, result.C, 1e-3);
+        }
+
+        // Test sprawdza, czy operator "+" poprawnie łączy dwa pudełka o identycznych wymiarach,  gdzie wynikowe wymiary powinny być takie same jak wymiary wejściowe.
+        [TestMethod, TestCategory("Operators overloading")]
+        public void Operator_Plus_LaczenieZRowneWymiary()
+        {
+            // AAA
+
+            // Arrange
+            var p1 = new Pudelko(1.0, 2.0, 3.0);
+            var p2 = new Pudelko();
+
+            // Act
+            var result = p1 + p2;
+
+            // Assert
+            Assert.AreEqual(1.0, result.A, 1e-3);
+            Assert.AreEqual(2.0, result.B, 1e-3);
+            Assert.AreEqual(3.0, result.C, 1e-3);
+        }
+
         #endregion
 
         #region Conversions =====================================
@@ -508,6 +683,124 @@ namespace PudelkoUnitTests
 
         #region Parsing =========================================
 
+        [TestMethod, TestCategory("Parsing")]
+        // Test sprawdza, czy metoda Parse poprawnie parsuje ciąg wejściowy w metrach.
+        public void Parse_PoprawnyFormat_Metry()
+        {
+            // TAA
+
+            // Arrange
+            string input = "2.500 m × 3.100 m × 4.200 m";
+
+            // Act
+            var wynik = Pudelko.Parse(input);
+
+            // Assert
+            Assert.AreEqual(2.5, wynik.A, 1e-3);
+            Assert.AreEqual(3.1, wynik.B, 1e-3);
+            Assert.AreEqual(4.2, wynik.C, 1e-3);
+        }
+
+        [TestMethod, TestCategory("Parsing")]
+        // Test sprawdza, czy metoda Parse poprawnie parsuje ciąg wejściowy w centymetrach.
+        public void Parse_PoprawnyFormat_Centymetry()
+        {
+            // AAA
+
+            // Arrange
+            string input = "250.0 cm × 310.0 cm × 420.0 cm";
+
+            // Act
+            var wynik = Pudelko.Parse(input);
+
+            // Assert
+            Assert.AreEqual(2.5, wynik.A, 1e-3);
+            Assert.AreEqual(3.1, wynik.B, 1e-3);
+            Assert.AreEqual(4.2, wynik.C, 1e-3);
+        }
+
+        [TestMethod, TestCategory("Parsing")]
+        // Test sprawdza, czy metoda Parse poprawnie parsuje ciąg wejściowy w milimetrach.
+        public void Parse_PoprawnyFormat_Milimetry()
+        {
+            // AAA
+
+            // Arrange
+            string input = "2500 mm × 3100 mm × 4200 mm";
+
+            // Act
+            var wynik = Pudelko.Parse(input);
+
+            // Assert
+            Assert.AreEqual(2.5, wynik.A, 1e-3);
+            Assert.AreEqual(3.1, wynik.B, 1e-3);
+            Assert.AreEqual(4.2, wynik.C, 1e-3);
+        }
+
+        [TestMethod, TestCategory("Parsing")]
+        [ExpectedException(typeof(ArgumentNullException))]
+        // Test sprawdza, czy metoda Parse rzuca wyjątek ArgumentNullException dla pustego ciągu.
+        public void Parse_NullInput_ArgumentNullException()
+        {
+            // AAA
+
+            // Arrange
+            string input = null;
+
+            // Act
+            Pudelko.Parse(input);
+
+            // Assert 
+        }
+
+        [TestMethod, TestCategory("Parsing")]
+        [ExpectedException(typeof(FormatException))]
+        // Test sprawdza, czy metoda Parse rzuca wyjątek FormatException dla nieprawidłowego formatu.
+        public void Parse_NieprawidlowyFormat_FormatException()
+        {
+            // AAA
+
+            // Arrange
+            string input = "2.5m × 3.1m";
+
+            // Act
+            Pudelko.Parse(input);
+
+            // Assert 
+        }
+
+        [TestMethod, TestCategory("Parsing")]
+        [ExpectedException(typeof(FormatException))]
+        // Test sprawdza, czy metoda Parse rzuca wyjątek FormatException dla nieobsługiwanej jednostki.
+        public void Parse_NieprawidlowaJednostka_FormatException()
+        {
+            // AAA
+
+            // Arrange
+            string input = "2.5 km × 3.1 km × 4.2 km";
+
+            // Act
+            Pudelko.Parse(input);
+
+            // Assert 
+        }
+
+        [TestMethod, TestCategory("Parsing")]
+        // Test sprawdza, czy metoda Parse poprawnie parsuje ciąg wejściowy z różnymi jednostkami.
+        public void Parse_RozneJednostki()
+        {
+            // AAA
+            // Arrange
+            string input = "2.5 m × 310 cm × 4200 mm";
+
+            // Act
+            var wynik = Pudelko.Parse(input);
+
+            // Assert
+            Assert.AreEqual(2.5, wynik.A, 1e-3);
+            Assert.AreEqual(3.1, wynik.B, 1e-3);
+            Assert.AreEqual(4.2, wynik.C, 1e-3);
+        }
         #endregion
     }
 }
