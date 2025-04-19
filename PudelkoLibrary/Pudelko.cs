@@ -14,7 +14,7 @@ namespace PudelkoLibrary
         meter
     }
 
-
+    
     public sealed class Pudelko : IFormattable, IEquatable<Pudelko>, IEnumerable<double>
     {
         // Zadanie 1: Ograniczenia wymiarów
